@@ -357,7 +357,7 @@ void editorRefreshScreen()
   editorDrawRows(&ab);
 
   char buf[32];
-  snprintf(buf, sizeof(buf), "\x1b[%d;%dH", (E.cy - E.rowoff) + 1, E.cx + 1);
+  snprintf(buf, sizeof(buf), "\x1b[%d;%dH", (E.cy - E.rowoff) + 1, (E.cx - E.coloff) + 1);
   abAppend(&ab, buf, strlen(buf));
 
   abAppend(&ab, "\x1b[?25h", 6);
@@ -370,6 +370,8 @@ void editorRefreshScreen()
 
 void editorMoveCursor(int key)
 {
+  erow *row = (E.cy >= E.numrows) ? NULL : &E.row[E.cy];
+
   switch (key)
   {
   case ARROW_LEFT:
@@ -379,7 +381,10 @@ void editorMoveCursor(int key)
     }
     break;
   case ARROW_RIGHT:
-    E.cx++;
+    if (row && E.cx < row->size)
+    {
+      E.cx++;
+    }
     break;
   case ARROW_UP:
     if (E.cy != 0)
